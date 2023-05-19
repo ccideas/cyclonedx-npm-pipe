@@ -1,0 +1,15 @@
+name: CycloneDx node/npm sBOM Generator
+image: bitbucketpipelines/demo-pipe-bash:0.1.0
+category: Security
+description: Generates a CycloneDx compliant Software Bill of Materials for a node/npm project
+variables:
+  - name: IGNORE_NPM_ERRORS
+    default: 'false'
+repository: https://bitbucket.org/atlassian/demo-pipe-bash
+tags:
+  - sbom
+  - oss
+  - cyclonedx
+  - spdx
+  - oss security
+  - oss supply chain
