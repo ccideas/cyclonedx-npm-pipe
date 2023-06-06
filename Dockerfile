@@ -1,6 +1,9 @@
 FROM node:18.12.1-bullseye-slim
 
-RUN apt update
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY gen_sbom.sh /opt/gen_sbom.sh
 
