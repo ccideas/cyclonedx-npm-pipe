@@ -8,7 +8,7 @@ for a node/npm project
 Add the following snippet to the script section of your `bitbucket-pipelines.yml` file:
 
 ```yaml
-- pipe: ccideas/ccideas/cyclonedx-npm-pipe:0.1.0
+- pipe: ccideas/ccideas/cyclonedx-npm-pipe:1.0.0
   variables
     # IGNORE_NPM_ERRORS: "<boolean>" # Optional  
 ```
@@ -21,7 +21,7 @@ Add the following snippet to the script section of your `bitbucket-pipelines.yml
 
 Generates a CycloneDX compliant Software Bill of Materials
 for a node/npm project. The generated sBOM will be created in the
-sbom-output directoy and be named `${BITBUCKET_REPO_SLUG}-sbom.json`
+sbom-output directory and be named `${BITBUCKET_REPO_SLUG}-sbom.json`
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ pipeline:
               caches:
                 - node
               script:
-                - pipe: ccideas/cyclonedx-npm-pipe:0.1.0
+                - pipe: ccideas/cyclonedx-npm-pipe:1.0.0
               artifacts:
                 - sbom-output/**
 ```

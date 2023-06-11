@@ -24,7 +24,7 @@ npx() {
 }
 
 @test "Create output directory - output dir does exist" {
-  mkdir ${OUTPUT_DIRECTORY}
+  mkdir "${OUTPUT_DIRECTORY}"
 
   run check_output_directory
 
@@ -41,11 +41,11 @@ npx() {
 }
 
 @test "Set output filename - with BITBUCKET_REPO_SLUG" {
-  BITBUCKET_REPO_SLUG="SAMPLE_BITBUCKET_REPO"
+  export BITBUCKET_REPO_SLUG="SAMPLE_BITBUCKET_REPO"
 
   run set_sbom_filename
 
-  [ "${lines[0]}" = "sBOM will be written to sbom_output/SAMPLE_BITBUCKET_REPO.json" ]
+  [ "${lines[0]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.json" ]
   [ "$status" -eq 0 ]
 }
 
@@ -94,7 +94,7 @@ npx() {
 }
 
 @test "Generate node/npm sbom - ignore npm errors" {
-  IGNORE_NPM_ERRORS="true"
+  export IGNORE_NPM_ERRORS="true"
 
   run generate_cyclonedx_sbom_for_npm_project
 
