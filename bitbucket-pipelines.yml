@@ -26,7 +26,8 @@ pipelines:
       - step:
           name: 'Build Docker Image'
           script:
-            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - IMAGE_NAME=${BITBUCKET_REPO_SLUG}
+            - echo "IMAGE_NAME is set to:\ ${IMAGE_NAME}"
             - docker build . --file Dockerfile --tag ${IMAGE_NAME}
             - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
           services:
