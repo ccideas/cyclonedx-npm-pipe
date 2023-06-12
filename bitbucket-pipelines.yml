@@ -6,13 +6,18 @@ pipelines:
             name: 'Build and Test'
             script:
               - echo "Running tests...."
+              - ls -la
+              - ls -la test
               - test
         - step:
             image: koalaman/shellcheck-alpine:v0.9.0
             name: 'Shell Lint'
             script:
               - echo "Linting shell scripts"
-              - shellcheck **/*.sh **/*.bats
+              - ls -la
+              - shellcheck gen_sbom.sh
+              - shellcheck gen_sbom_functions.sh
+              - shellcheck test/gen_sbom.bats
         - step:
             image: hadolint/hadolint:v2.12.0-alpine
             name: 'Docker Lint'
