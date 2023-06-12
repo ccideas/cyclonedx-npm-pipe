@@ -6,7 +6,7 @@ pipelines:
             name: 'Build and Test'
             script:
               - echo "Running tests...."
-              - test --timing --pretty
+              - test
         - step:
             image: koalaman/shellcheck-alpine:v0.9.0
             name: 'Shell Lint'
@@ -23,10 +23,10 @@ pipelines:
         name: 'Deployment to Staging'
         deployment: staging
         script:
-          - echo "Plachholder - Deploy to Staging"
+          - echo "Placeholder - Deploy to Staging"
     - step:
         name: 'Deployment to Production'
         deployment: production
         trigger: 'manual'
         script:
-          - echo "Plachholder - Deploy to Staging"
+          - echo "Placeholder - Deploy to Production"
