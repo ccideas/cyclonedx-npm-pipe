@@ -12,7 +12,7 @@ pipelines:
             name: 'Shell Lint'
             script:
               - echo "Linting shell scripts"
-              - shellcheck gen_sbom.sh
+              - shellcheck -x gen_sbom.sh
               - shellcheck gen_sbom_functions.sh
               - shellcheck test/gen_sbom.bats
         - step:
