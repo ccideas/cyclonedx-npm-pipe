@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+# shellcheck source=./gen_sbom_functions.sh
 source './gen_sbom_functions.sh'
 
 #--------------------------------------------------------------------------------
