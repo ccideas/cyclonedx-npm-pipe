@@ -34,6 +34,7 @@ npx() {
 }
 
 @test "Set output filename - no BITBUCKET_REPO_SLUG" {
+  unset BITBUCKET_REPO_SLUG
   run set_sbom_filename
 
   [ "${lines[0]}" = "sBOM will be written to sbom_output/sbom.json" ]
