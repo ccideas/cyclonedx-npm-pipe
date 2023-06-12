@@ -21,14 +21,31 @@ pipelines:
             script:
               - echo "Linting Dockerfile(s)"
               - hadolint Dockerfile
-    - step:
-        name: 'Deployment to Staging'
-        deployment: staging
-        script:
-          - echo "Placeholder - Deploy to Staging"
-    - step:
-        name: 'Deployment to Production'
-        deployment: production
-        trigger: 'manual'
-        script:
-          - echo "Placeholder - Deploy to Production"
+  branches:
+    main:
+      - step:
+          name: 'Build Docker Image'
+          script:
+            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - docker build . --file Dockerfile --tag ${IMAGE_NAME}
+            - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
+          services:
+            - docker
+          caches:
+            - docker
+          artifacts:
+            - ".tar"
+      - step:
+          name: 'Publish Docker Image'
+          deployment: Production
+          trigger: manual
+          script:
+            - echo ${DOCKERHUB_PASSWORD} | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - docker load --input "${IMAGE_NAME}.tar"
+            - VERSION="prod-1.0.${BITBUCKET_BUILD_NUMBER}"
+            - IMAGE=${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}
+            - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
+            - docker push "${IMAGE}:${VERSION}"
+          services:
+            - docker
