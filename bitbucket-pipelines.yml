@@ -9,7 +9,7 @@ pipelines:
               - test --timing --pretty
         - step:
             image: koalaman/shellcheck-alpine:v0.9.0
-            name: 'Shell Line'
+            name: 'Shell Lint'
             script:
               - echo "Linting shell scripts"
               - shellcheck **/*.sh **/*.bats
