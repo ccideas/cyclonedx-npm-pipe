@@ -35,7 +35,7 @@ pipelines:
           caches:
             - docker
           artifacts:
-            - ".tar"
+            - "*.tar"
       - step:
           name: 'Publish Docker Image'
           deployment: Production
