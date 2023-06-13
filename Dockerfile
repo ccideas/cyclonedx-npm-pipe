@@ -5,7 +5,7 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY *.sh /opt
+COPY *.sh /opt/
 
 ENV GEN_SBOM_SCRIPT_LOCATION="/opt"
 ENV PATH="${GEN_SBOM_SCRIPT_LOCATION}:${PATH}"
