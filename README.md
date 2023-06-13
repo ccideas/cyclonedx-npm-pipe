@@ -5,18 +5,37 @@ for a node/npm project
 
 ## YAML Definition
 
-Add the following snippet to the script section of your `bitbucket-pipelines.yml` file:
+The following is an example of a bitbucket pipeline which installs npm dependencies and caches those
+dependencies in one step then uses those cached depdencies in the next step to build a CycloneDX
+sBOM. The following code snip would need to be added to the `bitbucket-pipelines.yml` file
 
 ```yaml
-- pipe: ccideas/ccideas/cyclonedx-npm-pipe:1.0.0
-  variables
-    # IGNORE_NPM_ERRORS: "<boolean>" # Optional  
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        caches:
+          - node
+        script:
+          - npm install
+          - npm test
+    - step:
+        name: Gen CycloneDX sBom
+        caches:
+          - node
+        script:
+          - pipe: docker://ccideas/cyclonedx-npm-pipe:prod-1.0.19
+            variables:
+              IGNORE_NPM_ERRORS: 'true' # optional
+        artifacts:
+          - sbom_output/*
 ```
 ## Variables
 
 | Variable              | Usage                                                       | Default | COMMAND |
 | --------------------- | ----------------------------------------------------------- | ------- | ------- |
 |IGNORE_NPM_ERRORS| Used to ignore any npm errors when generating the report. Typically used if you use npm install --force to install dependencies | false |
+
 ## Details
 
 Generates a CycloneDX compliant Software Bill of Materials
@@ -27,30 +46,6 @@ sbom-output directory and be named `${BITBUCKET_REPO_SLUG}-sbom.json`
 
 npm dependencies must be installed first. It is advised to install npm dependencies
 in one step then archive them, so they can be read by the pipe. See the example below.
-
-## Examples
-
-```yaml
-pipeline:
-  default:
-    - stage:
-        name: Generate CycloneDX sBOM
-        steps:
-          - step:
-              name: Install Dependencies
-              caches:
-                - node
-              script:
-                - npm install
-          - step:
-              name: Build sBOM
-              caches:
-                - node
-              script:
-                - pipe: ccideas/cyclonedx-npm-pipe:1.0.0
-              artifacts:
-                - sbom-output/**
-```
 
 ## Support
 
