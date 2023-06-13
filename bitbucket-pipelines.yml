@@ -1,3 +1,19 @@
+definitions:
+  steps:
+    - step: &build-docker-image
+        name: 'Build Docker Image'
+        script:
+          - IMAGE_NAME=${BITBUCKET_REPO_SLUG}
+          - echo "IMAGE_NAME is set to:\ ${IMAGE_NAME}"
+          - docker build . --file Dockerfile --tag ${IMAGE_NAME}
+          - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
+        services:
+          - docker
+        caches:
+          - docker
+        artifacts:
+          - "*.tar"
+
 pipelines:
   default:
     - parallel:
@@ -21,21 +37,10 @@ pipelines:
             script:
               - echo "Linting Dockerfile(s)"
               - hadolint Dockerfile
+        - step: *build-docker-image
   branches:
     main:
-      - step:
-          name: 'Build Docker Image'
-          script:
-            - IMAGE_NAME=${BITBUCKET_REPO_SLUG}
-            - echo "IMAGE_NAME is set to:\ ${IMAGE_NAME}"
-            - docker build . --file Dockerfile --tag ${IMAGE_NAME}
-            - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
-          services:
-            - docker
-          caches:
-            - docker
-          artifacts:
-            - "*.tar"
+      - step: *build-docker-image
       - step:
           name: 'Publish Docker Image'
           deployment: Production
