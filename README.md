@@ -3,6 +3,11 @@
 A Bitbucket Pipe which generates a CycloneDX compliant Software Bill of Materials
 for a node/npm project
 
+For obvious reason the official copy this project is hosted on [Bitbucket](https://bitbucket.org/ccideas1/cyclonedx-npm-pipe/src/main/).
+In order to reach a diverse audience a copy of the repo also exists in [GitHub](https://github.com/ccideas/cyclonedx-npm-pipe).
+It is recommended to submit Pull Requests to the Bitbucket copy, however submissions to either copy
+will be synced.
+
 ## YAML Definition
 
 The following is an example of a bitbucket pipeline which installs npm dependencies and caches those
