@@ -1,3 +1,19 @@
+definitions:
+  steps:
+    - step: &build-docker-image
+        name: 'Build Docker Image'
+        script:
+          - IMAGE_NAME=${BITBUCKET_REPO_SLUG}
+          - echo "IMAGE_NAME is set to:\ ${IMAGE_NAME}"
+          - docker build . --file Dockerfile --tag ${IMAGE_NAME}
+          - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
+        services:
+          - docker
+        caches:
+          - docker
+        artifacts:
+          - "*.tar"
+
 pipelines:
   default:
     - parallel:
@@ -6,16 +22,13 @@ pipelines:
             name: 'Build and Test'
             script:
               - echo "Running tests...."
-              - ls -la
-              - ls -la test
-              - test
+              - test/gen_sbom.bats
         - step:
             image: koalaman/shellcheck-alpine:v0.9.0
             name: 'Shell Lint'
             script:
               - echo "Linting shell scripts"
-              - ls -la
-              - shellcheck gen_sbom.sh
+              - shellcheck -x gen_sbom.sh
               - shellcheck gen_sbom_functions.sh
               - shellcheck test/gen_sbom.bats
         - step:
@@ -24,14 +37,21 @@ pipelines:
             script:
               - echo "Linting Dockerfile(s)"
               - hadolint Dockerfile
-    - step:
-        name: 'Deployment to Staging'
-        deployment: staging
-        script:
-          - echo "Placeholder - Deploy to Staging"
-    - step:
-        name: 'Deployment to Production'
-        deployment: production
-        trigger: 'manual'
-        script:
-          - echo "Placeholder - Deploy to Production"
+        - step: *build-docker-image
+  branches:
+    main:
+      - step: *build-docker-image
+      - step:
+          name: 'Publish Docker Image'
+          deployment: Production
+          trigger: manual
+          script:
+            - echo ${DOCKERHUB_PASSWORD} | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - docker load --input "${IMAGE_NAME}.tar"
+            - VERSION="prod-1.0.${BITBUCKET_BUILD_NUMBER}"
+            - IMAGE=${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}
+            - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
+            - docker push "${IMAGE}:${VERSION}"
+          services:
+            - docker

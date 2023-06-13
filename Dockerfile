@@ -5,9 +5,10 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY gen_sbom.sh /opt/gen_sbom.sh
+COPY *.sh /opt/
 
-ENV PATH="/opt:${PATH}"
+ENV GEN_SBOM_SCRIPT_LOCATION="/opt"
+ENV PATH="${GEN_SBOM_SCRIPT_LOCATION}:${PATH}"
 
 # Create a non-root user and group
 RUN addgroup --system --gid 1002 bitbucket-group && \

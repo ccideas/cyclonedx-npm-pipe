@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-source './gen_sbom_functions.sh'
+if [ -z "${GEN_SBOM_SCRIPT_LOCATION}" ]; then
+  source "./gen_sbom_functions.sh"
+else
+  source "${GEN_SBOM_SCRIPT_LOCATION}/gen_sbom_functions.sh"
+fi
 
 #--------------------------------------------------------------------------------
 #----------------------------------Program Start---------------------------------
