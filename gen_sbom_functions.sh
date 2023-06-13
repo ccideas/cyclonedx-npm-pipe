@@ -36,18 +36,18 @@ help() {
 }
 
 generate_cyclonedx_sbom_for_npm_project() {
-  SWITCHES="--output-file ${OUTPUT_FILENAME} --short-PURLs"
+  SWITCHES=( "--output-file" "${OUTPUT_FILENAME}" "--short-PURLs" )
 
   echo "installing cyclonedx/cyclonedx-npm"
   npx --yes --package @cyclonedx/cyclonedx-npm --call exit
 
   if [ "${IGNORE_NPM_ERRORS}" != "true" ]; then
     echo "generating cyclonedx sbom"
-    npx @cyclonedx/cyclonedx-npm "${SWITCHES}"
+    npx @cyclonedx/cyclonedx-npm "${SWITCHES[@]}"
   else
     echo "${IGNORE_NPM_ERRORS_WARNING}"
     echo "generating sbom by ignoring npm errors"
-    npx @cyclonedx/cyclonedx-npm --ignore-npm-errors "${SWITCHES}"
+    npx @cyclonedx/cyclonedx-npm --ignore-npm-errors "${SWITCHES[@]}"
   fi
 }
 
