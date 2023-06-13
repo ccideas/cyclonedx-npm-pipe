@@ -47,6 +47,18 @@ sbom-output directory and be named `${BITBUCKET_REPO_SLUG}-sbom.json`
 npm dependencies must be installed first. It is advised to install npm dependencies
 in one step then archive them, so they can be read by the pipe. See the example below.
 
+## Example
+
+A working pipeline for the popular [auditjs](https://www.npmjs.com/package/auditjs) 
+tool has been created as an example. The pipeline in
+this fork of the [auditjs](https://www.npmjs.com/package/auditjs) tool will install the required
+dependencies then generate a CycloneDX sBOM containing all the ingredients which make up the 
+product.
+
+* [Repository Link](https://bitbucket.org/ccideas1/fork-auditjs/src/main/)
+* [Link to bitbucket-pipelines.yml](https://bitbucket.org/ccideas1/fork-auditjs/src/main/bitbucket-pipelines.yml)
+* [Link to pipeline](https://bitbucket.org/ccideas1/fork-auditjs/pipelines/results/4)
+
 ## Support
 
 If you'd like help with this pipe, or you have an issue, or a feature request, [let us know](https://github.com/ccideas/cyclonedx-npm-pipe/issues).
