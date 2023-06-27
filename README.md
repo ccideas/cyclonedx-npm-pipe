@@ -32,14 +32,26 @@ pipelines:
           - pipe: docker://ccideas/cyclonedx-npm-pipe:prod-1.0.19
             variables:
               IGNORE_NPM_ERRORS: 'true' # optional
+              NPM_SHORT_PURLS: 'true' # optional
+              NPM_OUTPUT_FORMAT: 'true' # optional
+              NPM_PACKAGE_LOCK_ONLY: 'false' # optional
         artifacts:
           - sbom_output/*
 ```
 ## Variables
 
-| Variable              | Usage                                                       | Default | COMMAND |
-| --------------------- | ----------------------------------------------------------- | ------- | ------- |
-|IGNORE_NPM_ERRORS| Used to ignore any npm errors when generating the report. Typically used if you use npm install --force to install dependencies | false |
+| Variable                  | Usage                                                               | Options                         | Default       |
+| ---------------------     | -----------------------------------------------------------         | -----------                     | -------       |
+| IGNORE_NPM_ERRORS         | Used to ignore any npm errors when generating the report            | true, false                     | false         |
+| NPM_FLATTEN_COMPONENTS    | Used to specify if the components should be flattened               | true, false                     | false         |
+| NPM_SHORT_PURLS           | Used to specify if qualifiers from PackageURLs should be shortened  | true, false                     | false         |
+| NPM_OUTPUT_REPRODUCIBLE   | Used to specify if the output should be reproducible                | true, false                     | false         |
+| NPM_SPEC_VERSION          | Used to specify the version of the CycloneDX spec                   | 1.2, 1.3, 1.4                   | 1.4           |
+| NPM_MC_TYPE               | Used to specify the type of main component                          | application, firmware, library  | application   |
+| NPM_OMIT                  | Used to omit specific dependency types                              | dev, optional, peer             | none          | 
+| NPM_OUTPUT_FORMAT         | Used to specify output format of the sBOM                           | json, xml                       | json          |
+| NPM_PACKAGE_LOCK_ONLY     | Used to use only the package-lock.json file to find dependencies    | true, false                     | false         |
+
 
 ## Details
 

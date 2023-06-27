@@ -1,5 +1,11 @@
 #!/usr/bin/env bats
 
+# shellcheck disable=SC2030,SC2031,SC2317
+# SC2030 (info): Modification of NPM_SHORT_PURLS is local (to subshell caused by @bats test)
+# SC2031 (info): NPM_OUTPUT_FORMAT was modified in a subshell. That change might be lost.
+# SC2317 (info): Command appears to be unreachable. Check usage (or ignore if invoked indirectly).
+# None of the above checks are subable for the bats framework
+
 # file under test
 load '../gen_sbom_functions.sh'
 
@@ -35,6 +41,7 @@ npx() {
 
 @test "Set output filename - no BITBUCKET_REPO_SLUG" {
   unset BITBUCKET_REPO_SLUG
+  unset OUTPUT_FORMAT
   run set_sbom_filename
 
   [ "${lines[0]}" = "sBOM will be written to sbom_output/sbom.json" ]
@@ -43,10 +50,21 @@ npx() {
 
 @test "Set output filename - with BITBUCKET_REPO_SLUG" {
   export BITBUCKET_REPO_SLUG="SAMPLE_BITBUCKET_REPO"
+  unset OUTPUT_FORMAT
 
   run set_sbom_filename
 
   [ "${lines[0]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.json" ]
+  [ "$status" -eq 0 ]
+}
+
+@test "Set output filename - with a set output format" {
+  export BITBUCKET_REPO_SLUG="SAMPLE_BITBUCKET_REPO"
+  export NPM_OUTPUT_FORMAT="xml"
+
+  run set_sbom_filename
+
+  [ "${lines[0]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.xml" ]
   [ "$status" -eq 0 ]
 }
 
@@ -90,19 +108,122 @@ npx() {
   run generate_cyclonedx_sbom_for_npm_project
 
   [ "${lines[0]}" = "installing cyclonedx/cyclonedx-npm" ]
-  [ "${lines[2]}" = "generating cyclonedx sbom" ]
   [ "$status" -eq 0 ]
 }
 
-@test "Generate node/npm sbom - ignore npm errors" {
+@test "Verify boolean cmd switches - true" {
+  export NPM_PACKAGE_LOCK_ONLY="true"
   export IGNORE_NPM_ERRORS="true"
+  export NPM_FLATTEN_COMPONENTS="true"
+  export NPM_SHORT_PURLS="true"
+  export NPM_OUTPUT_REPRODUCIBLE="true"
 
-  run generate_cyclonedx_sbom_for_npm_project
+  output=$(generate_switches)
+  echo "${output}"
 
-  # Assert the expected behavior
-  [ "${lines[0]}" = "installing cyclonedx/cyclonedx-npm" ]
-  [ "${lines[7]}" = "generating sbom by ignoring npm errors" ]
-  [ "$status" -eq 0 ]
+  FAILURE_DETECTED=0
+
+  if [[ ${output} != *"--package-lock-only"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --package-lock-only switch"
+  fi
+
+  if [[ ${output} != *"--ignore-npm-errors"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --ignore-npm-errors switch"
+  fi
+
+  if [[ ${output} != *"--flatten-components"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --flatten-components switch"
+  fi
+
+  if [[ ${output} != *"--short-PURLs"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --short-purls"
+  fi
+
+  if [[ ${output} != *"--output-reproducible"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --output-reproducible switch"
+  fi
+
+  return ${FAILURE_DETECTED}
+}
+
+@test "Verify boolean cmd switches - mixed" {
+  export NPM_PACKAGE_LOCK_ONLY="false"
+  export IGNORE_NPM_ERRORS="true"
+  export NPM_FLATTEN_COMPONENTS="true"
+  export NPM_SHORT_PURLS="false"
+
+  output=$(generate_switches)
+  echo "${output}"
+
+  FAILURE_DETECTED=0
+
+  # test for switches which should be set
+  if [[ ${output} != *"--ignore-npm-errors"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --ignore-npm-errors switch"
+  fi
+
+  if [[ ${output} != *"--flatten-components"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: did not find --flatten-components switch"
+  fi
+
+  # verify switches which should not be set
+  if [[ ${output} == *"--package-lock-only"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: found --package-lock-only switch -- this should not be set"
+  fi
+
+  if [[ ${output} == *"--short-PURLs"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: found --short-purls -- this should not be set"
+  fi
+
+  if [[ ${output} == *"--output-reproducible"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: found --output-reproducible switch -- this should not be set"
+  fi
+
+  return "${FAILURE_DETECTED}"
+}
+
+@test "Verify switches with params" {
+  export NPM_SPEC_VERSION="1.4"
+  export NPM_MC_TYPE="application"
+  export NPM_OMIT="dev"
+  export NPM_OUTPUT_FORMAT="json"
+
+  output=$(generate_switches)
+  echo "${output}"
+
+  FAILURE_DETECTED=0
+
+  if [[ ${output} != *"--spec-version 1.4"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: --spec-version was not properly set"
+  fi
+
+  if [[ ${output} != *"--mc-type application"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: --mc-type was not properly set"
+  fi
+
+  if [[ ${output} != *"--omit dev"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: --omit was not successfully set"
+  fi
+
+  if [[ ${output} != *"--output-format json"* ]]; then
+    FAILURE_DETECTED=$((FAILURE_DETECTED + 1))
+    echo "error: --output-format was not successfully set"
+  fi
+
+  return "${FAILURE_DETECTED}"
 }
 
 #--------------------------------------------------------------------------------
