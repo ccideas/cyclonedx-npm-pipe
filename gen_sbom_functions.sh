@@ -39,11 +39,21 @@ help() {
 }
 
 generate_cyclonedx_sbom_for_npm_project() {
-  echo "installing cyclonedx/cyclonedx-npm"
-  npx --yes --package @cyclonedx/cyclonedx-npm --call exit
-
+  CYCLONEDX_NPM_VERSION=$(cyclonedx-npm --version)
+  verify_cyclonedx
   generate_switches
-  npx @cyclonedx/cyclonedx-npm "${SWITCHES[@]}"
+  cyclonedx-npm "${SWITCHES[@]}"
+}
+
+verify_cyclonedx() {
+  echo "verifying @cyclonedx/cyclonedx-npm is installed"
+
+  if [[ "${CYCLONEDX_NPM_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "version ${CYCLONEDX_NPM_VERSION} of cyclonedx-npm is installed"
+  else
+    echo "ERROR: cannot validate version of cyclonedx-npm. Verify npm package is installed"
+    exit 1
+  fi
 }
 
 generate_switches() {

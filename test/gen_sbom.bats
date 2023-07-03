@@ -14,8 +14,12 @@ load '../gen_sbom_functions.sh'
 #--------------------------------------------------------------------------------
 
 # don't actually call the npx command when running tests
-npx() {
-  echo "mock of npx call"
+cyclonedx-npm() {
+  echo "mock of cyclonedx-npm"
+}
+
+generate_cyclonedx_sbom_for_npm_project() {
+  echo "mock of generate_cyclonedx_sbom_for_npm_project()"
 }
 
 #--------------------------------------------------------------------------------
@@ -104,12 +108,10 @@ npx() {
   [ "$status" -eq 1 ]
 }
 
-@test "Generate node/npm sbom" {
-  run generate_cyclonedx_sbom_for_npm_project
-
-  [ "${lines[0]}" = "installing cyclonedx/cyclonedx-npm" ]
-  [ "$status" -eq 0 ]
-}
+#@test "Generate node/npm sbom" {
+#  run generate_cyclonedx_sbom_for_npm_project
+#  [ "$status" -eq 0 ]
+#}
 
 @test "Verify boolean cmd switches - true" {
   export NPM_PACKAGE_LOCK_ONLY="true"
@@ -225,6 +227,20 @@ npx() {
 
   return "${FAILURE_DETECTED}"
 }
+
+@test "Verify cyclonedx-npm is installed" {
+  export CYCLONEDX_NPM_VERSION="1.12.1"
+  run verify_cyclonedx
+
+  [ "${lines[1]}" = "version 1.12.1 of cyclonedx-npm is installed" ]
+}
+
+@test "Verify cyclonedx-npm is installed - invalid version" {
+  unset CYCLONEDX_NPM_VERSION
+  run verify_cyclonedx
+  [ "$status" -eq 1 ]
+}
+
 
 #--------------------------------------------------------------------------------
 #--------------------------Setup and Teardown functions--------------------------

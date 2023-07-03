@@ -5,10 +5,14 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY *.sh /opt/
-
 ENV GEN_SBOM_SCRIPT_LOCATION="/opt"
 ENV PATH="${GEN_SBOM_SCRIPT_LOCATION}:${PATH}"
+
+COPY gen_*.sh $GEN_SBOM_SCRIPT_LOCATION/
+
+# install cyclonedx-npm
+RUN npm install --global @cyclonedx/cyclonedx-npm@1.12.1 \
+  && rm -rf /root/.npm
 
 # Create a non-root user and group
 RUN addgroup --system --gid 1002 bitbucket-group && \
