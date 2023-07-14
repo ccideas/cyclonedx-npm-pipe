@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Statics
 BOMBER_SWITCHES=()
+OUTPUT_DIRECTORY="sbom_output"
 
 ## purpose: scans generated sbom with bomber to report vulnerabilities
 
@@ -17,7 +19,7 @@ verify_bomber() {
 }
 
 check_sbom() {
-  echo "checking is sbom file exists"
+  echo "checking if sbom file exists"
 
   if [[ ! -e "${OUTPUT_FILENAME}" ]]; then
     echo "ERROR: cannot find sbom file to scan. Verify file was generated successfully"
@@ -56,4 +58,5 @@ generate_bomber_switches() {
 
 run_bomber_scan() {
   bomber scan "${BOMBER_SWITCHES[@]}" "${OUTPUT_FILENAME}"
+  cp ./*-bomber-results.* "${OUTPUT_DIRECTORY}"
 }
