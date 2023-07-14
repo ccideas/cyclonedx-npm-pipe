@@ -11,6 +11,9 @@ docker run --rm -it \
   --env NPM_OUTPUT_REPRODUCIBLE=false \
   --env NPM_MC_TYPE=application \
   --env IGNORE_NPM_ERRORS=true \
+  --env SCAN_SBOM_WITH_BOMBER=true \
+  --env BOMBER_OUTPUT_FORMAT="html" \
+  --env BOMBER_DEBUG=false \
   cyclonedx-npm-pipe:dev
 
 echo "successfully ran cyclonedx-npm-pipe locally..."

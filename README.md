@@ -1,7 +1,9 @@
 # Bitbucket Pipelines Pipe:  CycloneDX npm/node sBOM Generator
 
 A Bitbucket Pipe which generates a CycloneDX compliant Software Bill of Materials
-for a node/npm project
+for a node/npm project. Optionally this pipe has the ability to scan the generated
+CycloneDX sBOM for OSS security vulnerabilities using various tools such as 
+[bomber](https://github.com/devops-kung-fu/bomber).
 
 For obvious reason the official copy this project is hosted on [Bitbucket](https://bitbucket.org/ccideas1/cyclonedx-npm-pipe/src/main/).
 In order to reach a diverse audience a copy of the repo also exists in [GitHub](https://github.com/ccideas/cyclonedx-npm-pipe).
@@ -35,6 +37,8 @@ pipelines:
               NPM_SHORT_PURLS: 'true' # optional
               NPM_OUTPUT_FORMAT: 'json' # optional
               NPM_PACKAGE_LOCK_ONLY: 'false' # optional
+              SCAN_SBOM_WITH_BOMBER: 'true' # optional
+              BOMBER_OUTPUT_FORMAT: 'html'
         artifacts:
           - sbom_output/*
 ```
@@ -51,7 +55,13 @@ pipelines:
 | NPM_OMIT                  | Used to omit specific dependency types                              | dev, optional, peer             | none          | 
 | NPM_OUTPUT_FORMAT         | Used to specify output format of the sBOM                           | json, xml                       | json          |
 | NPM_PACKAGE_LOCK_ONLY     | Used to use only the package-lock.json file to find dependencies    | true, false                     | false         |
-
+| SCAN_SBOM_WITH_BOMBER     | Used to scan the sBOM for vulnerabilities using bomber              | true, false                     | false         |
+| BOMBER_DEBUG              | Used to enable debug mode during bomber scan                        | true, false                     | false         |
+| BOMBER_IGNORE_FILE        | Used to tell bomber what CVEs to ignore                             | <path to bomber ignore file>    | none          |
+| BOMBER_PROVIDER           | Used to specify what vulnerability provider bomber will use         | osv, ossindex                   | osv           |
+| BOMBER_PROVIDER_TOKEN     | Used to specify an API token for the selected provider              | <provider apitoken>             | none          |
+| BOMBER_PROVIDER_USERNAME  | Used to specify an username for the selected provider               | <provider username>             | none          |
+| BOMBER_OUTPUT_FORMAT      | Used to specify the output format of the bomber scan                | json, html, stdout              | stdout        |
 
 ## Details
 
@@ -85,3 +95,12 @@ If you are reporting an issue, please include:
 the version of the pipe
 relevant logs and error messages
 steps to reproduce
+
+## Credits
+
+This Bitbucket pipe is a collection and integration of the following open source tools
+
+* [cyclonedx-npm](https://github.com/CycloneDX/cyclonedx-node-npm)
+* [bomber](https://github.com/devops-kung-fu/bomber)
+
+A big thank-you to the teams and volunteers who make these amazing tools available

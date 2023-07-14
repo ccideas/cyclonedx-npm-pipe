@@ -4,7 +4,7 @@
 # SC2030 (info): Modification of NPM_SHORT_PURLS is local (to subshell caused by @bats test)
 # SC2031 (info): NPM_OUTPUT_FORMAT was modified in a subshell. That change might be lost.
 # SC2317 (info): Command appears to be unreachable. Check usage (or ignore if invoked indirectly).
-# None of the above checks are subable for the bats framework
+# None of the above checks are suitable for the bats framework
 
 # file under test
 load '../gen_sbom_functions.sh'
@@ -107,11 +107,6 @@ generate_cyclonedx_sbom_for_npm_project() {
   [ "${lines[1]}" = "currently only node/npm based projects are supported" ]
   [ "$status" -eq 1 ]
 }
-
-#@test "Generate node/npm sbom" {
-#  run generate_cyclonedx_sbom_for_npm_project
-#  [ "$status" -eq 0 ]
-#}
 
 @test "Verify boolean cmd switches - true" {
   export NPM_PACKAGE_LOCK_ONLY="true"
