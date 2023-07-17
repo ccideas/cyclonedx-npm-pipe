@@ -31,14 +31,14 @@ pipelines:
         caches:
           - node
         script:
-          - pipe: docker://ccideas/cyclonedx-npm-pipe:prod-1.0.42
+          - pipe: docker://ccideas/cyclonedx-npm-pipe:1.1.0
             variables:
               IGNORE_NPM_ERRORS: 'true' # optional
               NPM_SHORT_PURLS: 'true' # optional
               NPM_OUTPUT_FORMAT: 'json' # optional
               NPM_PACKAGE_LOCK_ONLY: 'false' # optional
               SCAN_SBOM_WITH_BOMBER: 'true' # optional
-              BOMBER_OUTPUT_FORMAT: 'html'
+              BOMBER_OUTPUT_FORMAT: 'html' # optional
         artifacts:
           - sbom_output/*
 ```
