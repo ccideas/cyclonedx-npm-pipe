@@ -2,28 +2,39 @@
 set -e
 
 # Statics
-OUTPUT_DIRECTORY="sbom_output"
+DEFAULT_OUTPUT_DIRECTORY="sbom_output"
 SWITCHES=()
 
 ## purpose: generate a CycloneDX sBOM
 
 check_output_directory() {
-  echo "checking if output directory exists"
-  if [ ! -d "${OUTPUT_DIRECTORY}" ]; then
-    echo "creating output dir"
-    mkdir "${OUTPUT_DIRECTORY}"
+  if [ -n "${OUTPUT_DIRECTORY}" ]; then
+    export OUTPUT_DIR="${OUTPUT_DIRECTORY}"
   else
-    echo "${OUTPUT_DIRECTORY} already exists"
+    export OUTPUT_DIR="${DEFAULT_OUTPUT_DIRECTORY}"
+  fi
+
+  echo "writing output to ${OUTPUT_DIR}"
+  if [ ! -d "${OUTPUT_DIR}" ]; then
+    echo "creating ${OUTPUT_DIR}"
+    mkdir "${OUTPUT_DIR}"
+  else
+    echo "${OUTPUT_DIR} already exists"
   fi
 }
 
 set_sbom_filename() {
-  if [ -z "${BITBUCKET_REPO_SLUG}" ]; then
-    OUTPUT_FILENAME="${OUTPUT_DIRECTORY}/sbom"
+  check_output_directory
+
+  if [ -n "${SBOM_FILENAME}" ]; then
+    OUTPUT_FILENAME="${OUTPUT_DIR}/${SBOM_FILENAME}"
+  elif [ -n "${BITBUCKET_REPO_SLUG}" ]; then
+    OUTPUT_FILENAME="${OUTPUT_DIR}/${BITBUCKET_REPO_SLUG}"
   else
-    OUTPUT_FILENAME="${OUTPUT_DIRECTORY}/${BITBUCKET_REPO_SLUG}"
+    OUTPUT_FILENAME="${OUTPUT_DIR}/sbom"
   fi
 
+  # set the file extension
   if [ -n "${NPM_OUTPUT_FORMAT}" ]; then
     OUTPUT_FILENAME="${OUTPUT_FILENAME}.${NPM_OUTPUT_FORMAT}"
   else

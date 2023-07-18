@@ -13,7 +13,9 @@ docker run --rm -it \
   --env IGNORE_NPM_ERRORS=true \
   --env SCAN_SBOM_WITH_BOMBER=true \
   --env BOMBER_OUTPUT_FORMAT="html" \
-  --env BOMBER_DEBUG=false \
+  --env BOMBER_DEBUG=true \
+  --env OUTPUT_DIRECTORY="build" \
+  --env SBOM_FILENAME="auditjs_sbom" \
   cyclonedx-npm-pipe:dev
 
 echo "successfully ran cyclonedx-npm-pipe locally..."

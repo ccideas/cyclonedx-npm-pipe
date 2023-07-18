@@ -39,8 +39,10 @@ pipelines:
               NPM_PACKAGE_LOCK_ONLY: 'false' # optional
               SCAN_SBOM_WITH_BOMBER: 'true' # optional
               BOMBER_OUTPUT_FORMAT: 'html' # optional
+              BOMBER_DEBUG: 'true' # optional
+              OUTPUT_DIRECTORY: 'build' # optional # this dir should be archived by the pipeline
         artifacts:
-          - sbom_output/*
+          - build/*
 ```
 ## Variables
 
@@ -62,6 +64,8 @@ pipelines:
 | BOMBER_PROVIDER_TOKEN     | Used to specify an API token for the selected provider              | <provider apitoken>             | none          |
 | BOMBER_PROVIDER_USERNAME  | Used to specify an username for the selected provider               | <provider username>             | none          |
 | BOMBER_OUTPUT_FORMAT      | Used to specify the output format of the bomber scan                | json, html, stdout              | stdout        |
+| OUTPUT_DIRECTORY          | Used to specify the directory to place all output im                | <directory name>                | sbom_output   |
+| SBOM_FILENAME             | Used to specify the name of the sbom file                           | <filename>                      | ${bitbucket-repo-name}-sbom        |
 
 ## Details
 

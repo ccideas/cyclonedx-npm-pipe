@@ -29,36 +29,80 @@ generate_cyclonedx_sbom_for_npm_project() {
 @test "Create output directory - output dir does not exist" {
   run check_output_directory
 
-  [ -d "$OUTPUT_DIRECTORY" ]
+  EXPECTED_OUTPUT_DIR="sbom_output"
+
+  [ -d "${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[0]}" = "writing output to ${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[1]}" = "creating ${EXPECTED_OUTPUT_DIR}" ]
   [ "$status" -eq 0 ]
 }
 
 @test "Create output directory - output dir does exist" {
-  mkdir "${OUTPUT_DIRECTORY}"
+  EXPECTED_OUTPUT_DIR="sbom_output"
+  mkdir "${EXPECTED_OUTPUT_DIR}"
 
   run check_output_directory
 
-  [ -d "$OUTPUT_DIRECTORY" ]
-  [ "${lines[1]}" = "${OUTPUT_DIRECTORY} already exists" ]
+  [ -d "${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[0]}" = "writing output to ${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[1]}" = "${EXPECTED_OUTPUT_DIR} already exists" ]
+  [ "$status" -eq 0 ]
+}
+
+@test "Create output directory - custom dir - output dir does not exist" {
+  export OUTPUT_DIRECTORY="build"
+  run check_output_directory
+
+  EXPECTED_OUTPUT_DIR=${OUTPUT_DIRECTORY}
+
+  [ -d "${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[0]}" = "writing output to ${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[1]}" = "creating ${EXPECTED_OUTPUT_DIR}" ]
+  [ "$status" -eq 0 ]
+}
+
+@test "Create output directory - custom dir - output dir does exist" {
+  export OUTPUT_DIRECTORY="build"
+  EXPECTED_OUTPUT_DIR=${OUTPUT_DIRECTORY}
+  mkdir "${EXPECTED_OUTPUT_DIR}"
+
+  run check_output_directory
+
+  [ -d "${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[0]}" = "writing output to ${EXPECTED_OUTPUT_DIR}" ]
+  [ "${lines[1]}" = "${EXPECTED_OUTPUT_DIR} already exists" ]
   [ "$status" -eq 0 ]
 }
 
 @test "Set output filename - no BITBUCKET_REPO_SLUG" {
   unset BITBUCKET_REPO_SLUG
   unset OUTPUT_FORMAT
+  unset OUTPUT_DIRECTORY
   run set_sbom_filename
 
-  [ "${lines[0]}" = "sBOM will be written to sbom_output/sbom.json" ]
+  [ "${lines[2]}" = "sBOM will be written to sbom_output/sbom.json" ]
   [ "$status" -eq 0 ]
 }
 
 @test "Set output filename - with BITBUCKET_REPO_SLUG" {
   export BITBUCKET_REPO_SLUG="SAMPLE_BITBUCKET_REPO"
   unset OUTPUT_FORMAT
+  unset OUTPUT_DIRECTORY
 
   run set_sbom_filename
 
-  [ "${lines[0]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.json" ]
+  [ "${lines[2]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.json" ]
+  [ "$status" -eq 0 ]
+}
+
+@test "Set output filename - with SBOM_FILENAME" {
+  export SBOM_FILENAME="this_is_my_filename"
+  unset OUTPUT_FORMAT
+  unset OUTPUT_DIRECTORY
+
+  run set_sbom_filename
+
+  [ "${lines[2]}" = "sBOM will be written to sbom_output/${SBOM_FILENAME}.json" ]
   [ "$status" -eq 0 ]
 }
 
@@ -68,7 +112,18 @@ generate_cyclonedx_sbom_for_npm_project() {
 
   run set_sbom_filename
 
-  [ "${lines[0]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.xml" ]
+  [ "${lines[2]}" = "sBOM will be written to sbom_output/${BITBUCKET_REPO_SLUG}.xml" ]
+  [ "$status" -eq 0 ]
+}
+
+@test "Set output filename - custom dir - with a set output format" {
+  export BITBUCKET_REPO_SLUG="SAMPLE_BITBUCKET_REPO"
+  export NPM_OUTPUT_FORMAT="xml"
+  export OUTPUT_DIRECTORY="build"
+
+  run set_sbom_filename
+
+  [ "${lines[2]}" = "sBOM will be written to build/${BITBUCKET_REPO_SLUG}.xml" ]
   [ "$status" -eq 0 ]
 }
 
@@ -255,5 +310,11 @@ teardown() {
   if [ -f "package.json" ]; then
     echo "removing package.json"
     rm "package.json"
+  fi
+
+  # remove build if it exists
+  if [ -d "build" ]; then
+    echo "removing build directory"
+    rm -rf build
   fi
 }

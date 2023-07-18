@@ -18,7 +18,6 @@ if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   exit 0
 fi
 
-check_output_directory
 set_sbom_filename
 generate_cyclonedx_sbom
 

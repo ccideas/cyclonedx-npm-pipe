@@ -3,7 +3,6 @@ set -e
 
 # Statics
 BOMBER_SWITCHES=()
-OUTPUT_DIRECTORY="sbom_output"
 
 ## purpose: scans generated sbom with bomber to report vulnerabilities
 
@@ -58,5 +57,5 @@ generate_bomber_switches() {
 
 run_bomber_scan() {
   bomber scan "${BOMBER_SWITCHES[@]}" "${OUTPUT_FILENAME}"
-  cp ./*-bomber-results.* "${OUTPUT_DIRECTORY}"
+  mv ./*-bomber-results.* "${OUTPUT_DIR}"
 }
