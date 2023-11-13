@@ -164,3 +164,6 @@ output/
 
 # ide
 .idea/
+
+# push_to_github
+push_to_github.sh

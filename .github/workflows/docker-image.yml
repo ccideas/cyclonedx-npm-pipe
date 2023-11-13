@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag cyclonedc-npm-pipe:$(date +%s)
+      run: docker build --build-arg ARCH=amd64 --tag cyclonedc-npm-pipe:$(date +%s) .
