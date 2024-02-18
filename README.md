@@ -1,9 +1,7 @@
 # Bitbucket Pipelines Pipe:  CycloneDX npm/node sBOM Generator
 
 A Bitbucket Pipe which generates a CycloneDX compliant Software Bill of Materials
-for a node/npm project. Optionally this pipe has the ability to scan the generated
-CycloneDX sBOM for OSS security vulnerabilities using various tools such as 
-[bomber](https://github.com/devops-kung-fu/bomber).
+for a node/npm project.
 
 For obvious reason the official copy this project is hosted on [Bitbucket](https://bitbucket.org/ccideas1/cyclonedx-npm-pipe/src/main/).
 In order to reach a diverse audience a copy of the repo also exists in [GitHub](https://github.com/ccideas/cyclonedx-npm-pipe).
@@ -31,15 +29,12 @@ pipelines:
         caches:
           - node
         script:
-          - pipe: docker://ccideas/cyclonedx-npm-pipe:1.2.1
+          - pipe: docker://ccideas/cyclonedx-npm-pipe:1.3.0
             variables:
               IGNORE_NPM_ERRORS: 'true' # optional
               NPM_SHORT_PURLS: 'true' # optional
               NPM_OUTPUT_FORMAT: 'json' # optional
               NPM_PACKAGE_LOCK_ONLY: 'false' # optional
-              SCAN_SBOM_WITH_BOMBER: 'true' # optional
-              BOMBER_OUTPUT_FORMAT: 'html' # optional
-              BOMBER_DEBUG: 'true' # optional
               OUTPUT_DIRECTORY: 'build' # optional # this dir should be archived by the pipeline
         artifacts:
           - build/*
@@ -52,20 +47,12 @@ pipelines:
 | NPM_FLATTEN_COMPONENTS    | Used to specify if the components should be flattened               | true, false                     | false         |
 | NPM_SHORT_PURLS           | Used to specify if qualifiers from PackageURLs should be shortened  | true, false                     | false         |
 | NPM_OUTPUT_REPRODUCIBLE   | Used to specify if the output should be reproducible                | true, false                     | false         |
-| NPM_SPEC_VERSION          | Used to specify the version of the CycloneDX spec                   | 1.2, 1.3, 1.4                   | 1.4           |
+| NPM_SPEC_VERSION          | Used to specify the version of the CycloneDX spec                   | 1.2, 1.3, 1.4, 1.5              | 1.4           |
 | NPM_MC_TYPE               | Used to specify the type of main component                          | application, firmware, library  | application   |
 | NPM_OMIT                  | Used to omit specific dependency types                              | dev, optional, peer             | none          | 
 | NPM_OUTPUT_FORMAT         | Used to specify output format of the sBOM                           | json, xml                       | json          |
 | NPM_PACKAGE_LOCK_ONLY     | Used to use only the package-lock.json file to find dependencies    | true, false                     | false         |
-| SCAN_SBOM_WITH_BOMBER     | Used to scan the sBOM for vulnerabilities using bomber              | true, false                     | false         |
-| BOMBER_DEBUG              | Used to enable debug mode during bomber scan                        | true, false                     | false         |
-| BOMBER_IGNORE_FILE        | Used to tell bomber what CVEs to ignore                             | <path to bomber ignore file>    | none          |
-| BOMBER_PROVIDER           | Used to specify what vulnerability provider bomber will use         | osv, ossindex                   | osv           |
-| BOMBER_PROVIDER_TOKEN     | Used to specify an API token for the selected provider              | <provider apitoken>             | none          |
-| BOMBER_PROVIDER_USERNAME  | Used to specify an username for the selected provider               | <provider username>             | none          |
-| BOMBER_OUTPUT_FORMAT      | Used to specify the output format of the bomber scan                | json, html, stdout              | stdout        |
 | OUTPUT_DIRECTORY          | Used to specify the directory to place all output im                | <directory name>                | sbom_output   |
-| SBOM_FILENAME             | Used to specify the name of the sbom file                           | <filename>                      | ${bitbucket-repo-name}-sbom        |
 
 ## Details
 
@@ -105,6 +92,5 @@ steps to reproduce
 This Bitbucket pipe is a collection and integration of the following open source tools
 
 * [cyclonedx-npm](https://github.com/CycloneDX/cyclonedx-node-npm)
-* [bomber](https://github.com/devops-kung-fu/bomber)
 
 A big thank-you to the teams and volunteers who make these amazing tools available

@@ -167,3 +167,8 @@ output/
 
 # push_to_github
 push_to_github.sh
+
+# node
+package.json
+package-lock.json
+node_modules/
