@@ -3,53 +3,85 @@ definitions:
     - step: &build-docker-image
         name: 'Build Docker Image'
         script:
-          - IMAGE_NAME=${BITBUCKET_REPO_SLUG}
-          - echo "IMAGE_NAME is set to:\ ${IMAGE_NAME}"
-          - docker build --build-arg ARCH=amd64 --tag ${IMAGE_NAME} .
-          - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
+          - IMAGE_NAME=cyclonedx-npm-pipe
+          - docker build --build-arg ARCH=amd64 --tag "${IMAGE_NAME}:local" .
+          - docker save "${IMAGE_NAME}:local" --output "${IMAGE_NAME}.tar"
         services:
           - docker
         caches:
           - docker
         artifacts:
           - "*.tar"
+    - step: &build-and-test
+        name: 'Build and Test'
+        image: bats/bats:1.9.0
+        script:
+          - echo "Running tests...."
+          - test/gen_sbom.bats --timing --show-output-of-passing-tests --verbose-run
+    - step: &shell-check
+        name: 'Shell Lint'
+        image: koalaman/shellcheck-alpine:v0.9.0
+        script:
+          - echo "Linting shell scripts"
+          - shellcheck -x *.sh **/*.bats
+    - step: &docker-lint
+        name: 'Docker Lint'
+        image: hadolint/hadolint:v2.12.0-alpine
+        script:
+          - echo "Linting Dockerfile(s)"
+          - hadolint Dockerfile
+    - step: &markdown-lint
+        name: 'Markdown Lint'
+        image: markdownlint/markdownlint:0.13.0
+        script:
+          - echo "Linting Markdown Files"
+          - mdl *.md || echo "Potential mdlint issues found..."
 
 pipelines:
   default:
     - parallel:
-        - step:
-            image: bats/bats:1.9.0
-            name: 'Build and Test'
-            script:
-              - echo "Running tests...."
-              - test/gen_sbom.bats --timing
-        - step:
-            image: koalaman/shellcheck-alpine:v0.9.0
-            name: 'Shell Lint'
-            script:
-              - echo "Linting shell scripts"
-              - shellcheck -x *.sh **/*.bats
-        - step:
-            image: hadolint/hadolint:v2.12.0-alpine
-            name: 'Docker Lint'
-            script:
-              - echo "Linting Dockerfile(s)"
-              - hadolint Dockerfile
+        - step: *build-and-test
+        - step: *shell-check
+        - step: *docker-lint
+        - step: *markdown-lint
         - step: *build-docker-image
-  branches:
-    main:
+  custom:
+    push to Dockerhub (dev):
       - step: *build-docker-image
       - step:
-          name: 'Publish Docker Image'
-          deployment: Production
-          trigger: manual
+          name: 'Publish Dev Docker Image'
+          deployment: Development
           script:
             - echo ${DOCKERHUB_PASSWORD} | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
-            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - IMAGE_NAME=cyclonedx-npm-pipe
             - docker load --input "${IMAGE_NAME}.tar"
-            - VERSION="${PROD_VERSION}"
-            - IMAGE=${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}
-            - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
-            - docker push "${IMAGE}:${VERSION}"
+            - docker tag "${IMAGE_NAME}:local" "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${DEV_VERSION}-${BITBUCKET_BUILD_NUMBER}"
+            - docker push "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${DEV_VERSION}-${BITBUCKET_BUILD_NUMBER}"
           services:
             - docker
+    Prod Release:
+      - variables:
+          - name: PRODUCTION_VERSION
+      - step: *build-docker-image
+      - stage:
+          name: Deploy to Prod
+          deployment: Production
+          steps:
+            - step:
+                name: 'Publish Prod Docker Image'
+                script:
+                  - IMAGE_NAME=cyclonedx-npm-pipe
+                  - echo ${DOCKERHUB_PASSWORD} | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+                  - docker load --input "${IMAGE_NAME}.tar"
+                  - docker tag "${IMAGE_NAME}:local" "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${PRODUCTION_VERSION}"
+                  - docker push "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${PRODUCTION_VERSION}"
+                services:
+                  - docker
+                caches:
+                  - docker
+            - step:
+                name: tag branch
+                image: alpine/git:1.0.26
+                script:
+                  - git tag -a "v${PRODUCTION_VERSION}" -m "release version ${PRODUCTION_VERSION}"
+                  - git push origin "v${PRODUCTION_VERSION}"   
