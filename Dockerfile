@@ -1,13 +1,16 @@
-FROM node:18-bullseye-slim
+FROM node:18-alpine3.19
 
 ARG ARCH
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+ENV BASH_VERSION="5.2.21-r0"
 
-ENV CYCLONEDX_NPM_VERSION="1.16.1" \
+RUN apk update \
+    && apk upgrade \
+    && apk --no-cache add bash=${BASH_VERSION}
+
+SHELL ["/bin/bash", "-c"]
+
+ENV CYCLONEDX_NPM_VERSION="1.16.2" \
     GEN_SBOM_SCRIPT_LOCATION="/opt"
 ENV PATH="${GEN_SBOM_SCRIPT_LOCATION}:${PATH}"
 
