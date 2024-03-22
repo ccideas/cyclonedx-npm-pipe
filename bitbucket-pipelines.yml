@@ -36,15 +36,43 @@ definitions:
         script:
           - echo "Linting Markdown Files"
           - mdl *.md || echo "Potential mdlint issues found..."
+    - step: &gen-sbom-for-project
+          name: gen sbom
+          image: debian:bookworm-slim
+          services:
+            - docker
+          caches:
+            - docker
+          script:
+            - apt-get update
+            - DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+            - apt-get install -y curl
+            - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.0.1
+            - docker load --input "${BITBUCKET_REPO_SLUG}.tar"
+            - mkdir sbom_output
+            - syft "${BITBUCKET_REPO_SLUG}:local" --output cyclonedx-json@1.4 >> sbom_output/${BITBUCKET_REPO_SLUG}_cyclonedx-sbom.json
+          artifacts:
+            - sbom_output/*
 
 pipelines:
-  default:
-    - parallel:
-        - step: *build-and-test
-        - step: *shell-check
-        - step: *docker-lint
-        - step: *markdown-lint
-        - step: *build-docker-image
+  pull-requests:
+    '**':
+      - parallel:
+          - step: *build-and-test
+          - step: *shell-check
+          - step: *docker-lint
+          - step: *markdown-lint
+          - step: *build-docker-image
+      - step: *gen-sbom-for-project
+  branches:
+    main:
+      - parallel:
+          - step: *build-and-test
+          - step: *shell-check
+          - step: *docker-lint
+          - step: *markdown-lint
+          - step: *build-docker-image
+      - step: *gen-sbom-for-project
   custom:
     push to Dockerhub (dev):
       - step: *build-docker-image
@@ -63,6 +91,27 @@ pipelines:
       - variables:
           - name: PRODUCTION_VERSION
       - step: *build-docker-image
+      - stage:
+          name: OSS Scan
+          steps:
+            - step: *gen-sbom-for-project
+            - step:
+                name: Scan SBOM
+                script:
+                    - chmod 777 sbom_output
+                    - pipe: docker://ccideas/sbom-utilities-pipe:1.2.0
+                      variables:
+                          PATH_TO_SBOM: 'sbom_output/${BITBUCKET_REPO_SLUG}_cyclonedx-sbom.json'
+                          SCAN_SBOM_WITH_BOMBER: 'true'
+                          BOMBER_OUTPUT_FORMAT: 'html'
+                          BOMBER_DEBUG: 'true'
+                          OUTPUT_DIRECTORY: 'sbom_output'
+                          SCAN_SBOM_WITH_SBOMQS: 'true'
+                          SBOMQS_OUTPUT_FORMAT: 'table'
+                          SCAN_SBOM_WITH_OSV: 'true'
+                          OSV_OUTPUT_FORMAT: 'table'
+                artifacts:
+                  - sbom_output/*
       - stage:
           name: Deploy to Prod
           deployment: Production
