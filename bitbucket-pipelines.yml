@@ -2,6 +2,7 @@ definitions:
   steps:
     - step: &build-docker-image
         name: 'Build Docker Image'
+        size: 2x
         script:
           - IMAGE_NAME=cyclonedx-npm-pipe
           - docker build --build-arg ARCH=amd64 --tag "${IMAGE_NAME}:local" .
