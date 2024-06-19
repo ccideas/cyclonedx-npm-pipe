@@ -169,3 +169,6 @@ output/
 package.json
 package-lock.json
 node_modules/
+
+# tests
+sbom_output/

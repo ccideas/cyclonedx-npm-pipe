@@ -1,8 +1,8 @@
-FROM node:18-alpine3.19
+FROM node:18-alpine3.20
 
 ARG ARCH
 
-ENV BASH_VERSION="5.2.21-r0"
+ENV BASH_VERSION="5.2.26-r0"
 
 RUN apk update \
     && apk upgrade \
@@ -10,7 +10,7 @@ RUN apk update \
 
 SHELL ["/bin/bash", "-c"]
 
-ENV CYCLONEDX_NPM_VERSION="1.16.2" \
+ENV CYCLONEDX_NPM_VERSION="1.19.0" \
     GEN_SBOM_SCRIPT_LOCATION="/opt"
 ENV PATH="${GEN_SBOM_SCRIPT_LOCATION}:${PATH}"
 
